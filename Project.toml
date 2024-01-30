@@ -1,0 +1,7 @@
+[deps]
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+FreqTables = "da1fdf0e-e0ff-5433-a45f-9bb5ff651cb1"
+HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
+StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
+XLSX = "fdbf4ff8-1666-58a4-91e7-1b58723a45e0"
