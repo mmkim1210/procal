@@ -7,6 +7,13 @@ cols = [
     :abx1, :abx2, :abx3, :abx4, :date_discharge, :date_readmission
     ]
 
+[rename!(dfs[i], ["Participant #", "age", "Sex", "Nursing home resident (PSI)", "Calculated BMI", "HTN Hx", "diabetes",
+    "HLD Hx", "COPD", "CHF", "Renal disease history (PSI)", "ICU Stay", "Vasopressor Requirement", "Worst O2 over the course",
+    "History of MDRs", "Was patient readmitted due to CAP?", "Where did patient get discharged to?",
+    "DOT", "Total duration of therapy (NEW)", "Was patient discharge with antibiotics?", "Did patient passed away during hospital stay?",
+    "LOS", "Antibiotic 1 used for CAP", "Antibiotic 2 used for CAP", "Antibiotic 3 used for CAP", "Antibiotic 4 used for CAP",
+    "Date of discharge", "If patient was readmitted, what was the readmission date?"] .=>  cols) for i in 1:2]
+
 [select!(dfs[i], cols) for i in 1:2]
 @show [size(dfs[i]) for i in 1:2]
 
@@ -164,6 +171,13 @@ println(cols)
 df[!, :DOT_inpatient] = convert.(Float64, df[!, :DOT_inpatient])
 df[!, :DOT_total] = convert.(Float64, df[!, :DOT_total])
 df[!, :LOS] = convert.(Float64, df[!, :LOS])
+df[!, :abxdischarged] = convert.(Float64, df[!, :abxdischarged])
+df[!, :mortality] = convert.(Float64, df[!, :mortality])
+df[!, :readmissionPNA] = convert.(Float64, df[!, :readmissionPNA])
+
+freqtable(dfsmall, :abxdischarged, :intervention)
+freqtable(dfsmall, :mortality, :intervention)
+freqtable(dfsmall, :readmissionPNA, :intervention)
 
 dfsmall = filter(row -> row.abx == Set(["azithromycin", "ceftriaxone"]), df)
 
@@ -188,8 +202,41 @@ lm(@formula(DOT_total ~ intervention + age + sex + HTN + pressor +
     contrasts = Dict(:O2 => DummyCoding(base = "RA")))
 
 lm(@formula(LOS ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), df,
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+lm(@formula(LOS ~ intervention + age + sex + HTN + pressor + 
     nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), dfsmall,
     contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+glm(@formula(abxdischarged ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), df, Binomial(), LogitLink(),
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+glm(@formula(abxdischarged ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), dfsmall, Binomial(), LogitLink(),
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+glm(@formula(mortality ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), df, Binomial(), LogitLink(),
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+glm(@formula(mortality ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), dfsmall, Binomial(), LogitLink(),
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+glm(@formula(readmissionPNA ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), df, Binomial(), LogitLink(),
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+glm(@formula(readmissionPNA ~ intervention + age + sex + HTN + pressor + 
+    nursing + obesity + diabetes + HLD + COPD + HF + renal + MDRO + ICU + O2), dfsmall, Binomial(), LogitLink(),
+    contrasts = Dict(:O2 => DummyCoding(base = "RA")))
+
+# :intervention, :age*, :sex*, :nursing, :obesity, :HTN*, :diabetes, :HLD, :COPD, :HF, :renal, :MDRO, :ICU, :pressor*, :O2
+
+# look at the distribution of outcomes (:DOT_inpatient, :DOT_total, :LOS, :abxdischarged, :mortality, :readmissionPNA, :disposition), freqtable(storage)
+# change the types
 
 ordered = sort(combine(groupby(df, :abx), nrow => :count), :count, rev = true)
 
