@@ -175,11 +175,11 @@ df[!, :abxdischarged] = convert.(Float64, df[!, :abxdischarged])
 df[!, :mortality] = convert.(Float64, df[!, :mortality])
 df[!, :readmissionPNA] = convert.(Float64, df[!, :readmissionPNA])
 
+dfsmall = filter(row -> row.abx == Set(["azithromycin", "ceftriaxone"]), df)
+
 freqtable(dfsmall, :abxdischarged, :intervention)
 freqtable(dfsmall, :mortality, :intervention)
 freqtable(dfsmall, :readmissionPNA, :intervention)
-
-dfsmall = filter(row -> row.abx == Set(["azithromycin", "ceftriaxone"]), df)
 
 lm(@formula(DOT_inpatient ~ intervention + sex + HTN + HLD + ICU + pressor + O2 +
     age + nursing + obesity + diabetes + COPD + HF + renal + MDRO), df,
